@@ -9,3 +9,9 @@
 /Persistence/obj
 /SistemaManutencaoMotos/obj
 /UnitTests/obj
+/Application/bin/Debug/net8.0
+/Domain/bin/Debug/net8.0
+/IntegrationTests/bin/Debug/net8.0
+/Persistence/bin/Debug/net8.0
+/SistemaManutencaoMotos/bin/Debug/net8.0
+/UnitTests/bin/Debug/net8.0
