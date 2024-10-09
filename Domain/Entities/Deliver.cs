@@ -33,25 +33,27 @@ namespace Domain.Entities
         [Column("data_criada")]
         public DateTime? CreatedDate { get; set; }
 
+#pragma warning disable CS8618 
+        public Deliver() { }
+
+
         public Deliver(
+#pragma warning restore CS8618 
             string identifier,
             string name, 
             string uniqueIdentifier, 
             DateTime birthday, 
             string driverLicenseNumber, 
             string driverLicenseType, 
-            string driverLicenseS3,
-            string driverLicenseImage)
+            string driverLicenseS3)
         {
             this.Identifier = identifier;
             this.Name = name;
             this.Birthday = birthday;
-            this.DriverLicenseNumber = driverLicenseNumber;
-            this.DriverLicenseImage = driverLicenseImage;
+            this.DriverLicenseNumber = driverLicenseNumber;            
             this.DriverLicenseType = driverLicenseType;
             this.UniqueIdentifier = uniqueIdentifier;
-            this.DriverLicenseImageS3 = driverLicenseS3 ?? string.Empty;
-            this.DriverLicenseImage = driverLicenseImage;
+            this.DriverLicenseImageS3 = driverLicenseS3 ?? string.Empty;            
         }
         
         public Deliver Update(string driverLicenseImage, string driverLicenseS3)

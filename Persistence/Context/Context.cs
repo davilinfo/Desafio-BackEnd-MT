@@ -28,8 +28,7 @@ namespace Persistence.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.UseIdentityColumns();
-            modelBuilder.Entity<MotocycleBike>().HasIndex(p => p.Plate).IsUnique();
-            modelBuilder.Entity<MotocycleBike>().Property(p => p.CreatedDate).HasDefaultValue(DateTime.UtcNow.Date);
+            modelBuilder.Entity<MotocycleBike>().HasIndex(p => p.Plate).IsUnique();            
             modelBuilder.Entity<Deliver>().HasIndex(p=> p.Identifier).IsUnique();
             modelBuilder.Entity<Deliver>().HasIndex(p=> p.DriverLicenseNumber).IsUnique();
             base.OnModelCreating(modelBuilder);

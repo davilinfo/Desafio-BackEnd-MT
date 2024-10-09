@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
+using Persistence.Context;
 
+const string defaultConnectionString = "DefaultConnection";
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -12,6 +15,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<Context>(o=> o.UseNpgsql(builder.Configuration.GetConnectionString(defaultConnectionString), a=> a.EnableRetryOnFailure()));
 
 var app = builder.Build();
 

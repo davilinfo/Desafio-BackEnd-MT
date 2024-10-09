@@ -29,7 +29,7 @@ namespace Domain.Deliver.Commands
 
         public Domain.Entities.Deliver CreateDeliver()
         {
-            return new Entities.Deliver(Identifier, Name, UniqueIdentifier, Birthday, DriverLicenseNumber, DriverLicenseType, DriverLicenseImageS3, DriverLicenseImage);
+            return new Entities.Deliver(Identifier, Name, UniqueIdentifier, Birthday, DriverLicenseNumber, DriverLicenseType, DriverLicenseImageS3);
         }        
 
         public override bool IsValid()
