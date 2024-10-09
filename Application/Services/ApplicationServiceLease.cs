@@ -19,12 +19,9 @@ namespace Application.Services
         private readonly IRepositoryMotocycleBike _repositoryMotocycleBike;
         private readonly IRepositoryDeliver _repositoryDeliver;
         private readonly INotify<ResponseLease> _notify;
-        private readonly ILogger<ApplicationServiceLease> _logger;
-        private readonly string _assemblyName = "Application";
-        private readonly int _evtId = 21000;
+        private readonly ILogger<ApplicationServiceLease> _logger;        
         private readonly string _invalid = "Dados inválidos";
-        private readonly string _notSaved = "Dados não gravados";
-        private readonly string _saved = "Dados gravados";
+        private readonly string _notSaved = "Dados não gravados";        
         private readonly string _notFoundDeliver = "Entregador inexistente";
         private readonly string _notFoundMotocycleBike = "Moto inexistente";
         private readonly string _deliverLicenseInvalid = "Carteira de habilitação inválida";

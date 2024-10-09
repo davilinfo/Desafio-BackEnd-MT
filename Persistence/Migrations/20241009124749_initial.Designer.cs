@@ -13,7 +13,9 @@ namespace Persistence.Migrations
 {
     [DbContext(typeof(Context.Context))]
     [Migration("20241009124749_initial")]
+#pragma warning disable CS8981
     partial class initial
+#pragma warning restore CS8981
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
