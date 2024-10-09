@@ -6,6 +6,7 @@ namespace Application.Interface
     public interface IApplicationServiceMotocycleBike : IApplicationService<ResponseMotocycleBike,RequestMotocycleAdd,RequestMotocycleUpdate>
     {
         public new Task<ResponseMotocycleBike> CreateAsync(RequestMotocycleAdd request);
-        public new Task<ResponseMotocycleBike> UpdateAsync(string identifier, RequestMotocycleUpdate request);        
+        public new Task<ResponseMotocycleBike> UpdateAsync(string identifier, RequestMotocycleUpdate request);
+        public Task<ResponseMotocycleBike> GetByPlate(string plate);
     }
 }

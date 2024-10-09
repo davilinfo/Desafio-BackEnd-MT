@@ -8,6 +8,7 @@ namespace Domain.Lease.Validations
     public class LeaseValidation<T> : AbstractValidator<LeaseCommand> where T : class
     {
         const string _mandatoryRules = "Dados inválidos";
+        const string _planRule = "Plano pode ser apenas 7, 15, 30, 45, 50";
         public void ValidateLeaseMotocycleBikeId()
         {
             RuleFor(p=> p.MotocycleBikeId).NotEmpty().WithMessage(_mandatoryRules);
@@ -31,6 +32,7 @@ namespace Domain.Lease.Validations
         public void ValidateLeasePlan()
         {
             RuleFor(p=> p.Plan).NotEmpty().WithMessage(_mandatoryRules);
+            RuleFor(p => p.Plan).Must(p => p == 7 || p == 15 || p == 30 || p == 45 || p == 50).WithMessage(_planRule);
         }
         public void ValidateLeaseDevolutionDate()
         {
