@@ -7,6 +7,7 @@ using Domain.Contract;
 using Domain.Deliver.Commands;
 using Domain.Entities;
 using Ipfs.Engine;
+using Microsoft.Extensions.Logging;
 using System.Text;
 
 namespace Application.Services
@@ -16,16 +17,21 @@ namespace Application.Services
         private readonly IMapper _mapper;
         private readonly IRepositoryDeliver _repositoryDeliver;        
         private readonly INotify<Deliver> _notify;
+        private readonly ILogger<ApplicationServiceDeliver> _logger;
         private readonly string _notSaved = "Dados não gravados";
         private readonly string _invalid = "Dados inválidos";
         private readonly string _foundDriverLicenseNumber = "Já existe cnh cadastrada";
         private readonly string _foundDeliverUniqueIdentifier = "Já existe cnpj cadastrado";
+        private readonly string _retrievedBase64String = "Retrieved Base64 string:";
+        private readonly string _addedToIPFS = "Added Base64 string to IPFS:";
         private readonly int _notAffectedSet = 0;
-        public ApplicationServiceDeliver(IMapper mapper, IRepositoryDeliver repositoryDeliver, INotify<Deliver> notify) 
+        public ApplicationServiceDeliver(IMapper mapper, IRepositoryDeliver repositoryDeliver, 
+            INotify<Deliver> notify, ILogger<ApplicationServiceDeliver> logger) 
         { 
             _mapper = mapper;
             _repositoryDeliver = repositoryDeliver;
             _notify = notify;
+            _logger = logger;
         }
         public async Task<ResponseDeliver> CreateAsync(RequestDeliverAdd requestDeliverAdd)
         {
@@ -122,9 +128,22 @@ namespace Application.Services
             using (var fs = new MemoryStream(data))
             {                
                 var node = await ipfs.FileSystem.AddAsync(fs);
+                _logger.LogInformation($"{_addedToIPFS} {base64string} {node.Id}");
+                
                 fs.Close();
                 return node.Id;                
             }                            
+        }
+
+        private async Task<string> GetFromIPFS(string cid)
+        {
+            var ipfs = new IpfsEngine();
+            var retrievedData = await ipfs.FileSystem.ReadFileAsync(cid);
+            var data = new byte[retrievedData.Length];
+            retrievedData.Write(data, 0, data.Length);
+            string retrievedBase64String = Convert.ToBase64String(data);
+            _logger.LogInformation($"{_retrievedBase64String} {retrievedBase64String}");
+            return retrievedBase64String;
         }
     }
 }
