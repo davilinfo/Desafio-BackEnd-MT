@@ -12,7 +12,6 @@ docker run --name redis -p 6379:6379 -d redis
 - port 5672
 
 ## Postgres installation in docker (cluster better option)
-## Database Postgres (Etapas)
 
 ### Para criar database no docker execute no cmd (elevação)
 docker run --name manutencaomoto -p 5432:5432 -e POSTGRES_USER=moto -e POSTGRES_PASSWORD=moto -e POSTGRES_DB=manutencaomoto -d postgres
@@ -23,7 +22,7 @@ dotnet ef database update 20241009124749_initial --project Persistence -s Sistem
 Update-Database
 
 ### Connection string de alta performance
-"Host=localhost;Port=5432;Database=manutencaomoto;Username=moto;Password=moto;Pooling=true;MinPoolSize=10;MaxPoolSize=100;No Reset On Close=true;"
+-"Host=localhost;Port=5432;Database=manutencaomoto;Username=moto;Password=moto;Pooling=true;MinPoolSize=10;MaxPoolSize=100;No Reset On Close=true;"
 
 - Pooling=true: Habilita o uso de pool de conexões, o que melhora a performance ao reutilizar conexões existentes.
 - MinPoolSize=10: Define o número mínimo de conexões no pool.
