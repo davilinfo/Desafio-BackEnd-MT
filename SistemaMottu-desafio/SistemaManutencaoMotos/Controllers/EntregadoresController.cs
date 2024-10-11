@@ -2,6 +2,7 @@
 using Application.Interface;
 using Application.Models.Request;
 using Application.Models.Response;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 
@@ -10,7 +11,7 @@ namespace SistemaManutencaoMotos.Controllers
     /// <summary>
     /// Sistema de manutenção de entregador
     /// </summary>    
-    //[Authorize(Roles = "User")]
+    [Authorize(Roles = "User")]
     [ApiController]
     [Route("")]
     [RequiredScope(RequiredScopesConfigurationKey = "AzureAd:Scopes")]
