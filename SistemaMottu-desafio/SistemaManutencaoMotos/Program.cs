@@ -1,13 +1,16 @@
 using Application.Interface;
 using Application.Models.Response;
+using Application.Models.ViewModel;
 using Application.Services;
 using Domain.Contract;
+using Domain.Contract.Mongo;
 using Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 using Persistence.Context;
+using Persistence.MongoRepository;
 using Persistence.Repository;
 using System.Reflection;
 
@@ -63,12 +66,20 @@ builder.Services.AddScoped<IApplicationServiceLease, ApplicationServiceLease>();
 builder.Services.AddScoped<IApplicationServiceMotocycleBike, ApplicationServiceMotocycleBike>();
 #endregion
 #region scoped notifiers
-builder.Services.AddScoped<INotify<Deliver>, NotifyDeliver>();
-builder.Services.AddScoped<INotify<ResponseMotocycleBike>, NotifyMotocycleBike>();
-builder.Services.AddScoped<INotify<ResponseLease>, NotifyLease>();
+builder.Services.AddScoped<INotify<MessageDeliver>, NotifyDeliver>();
+builder.Services.AddScoped<INotify<MessageMoto>, NotifyMotocycleBike>();
+builder.Services.AddScoped<INotify<MessageLease>, NotifyLease>();
 builder.Services.AddScoped<INotify<string>, NotifyString>();
 #endregion
+#region singleton
+builder.Services.AddSingleton<IRepositoryMongoMoto, RepositoryMongoMotocycleBike>();
+builder.Services.AddSingleton<IRepositoryMongoDeliver, RepositoryMongoDeliver>();
+builder.Services.AddSingleton<IRepositoryMongoLease, RepositoryMongoLease>();
+#endregion
 builder.Services.AddAutoMapper(Assembly.Load("Application"));
+builder.Services.AddHostedService<ListenerQueueMoto>();
+builder.Services.AddHostedService<ListenerQueueDeliver>();
+builder.Services.AddHostedService<ListenerQueueLease>();
 
 var app = builder.Build();
 

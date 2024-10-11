@@ -3,6 +3,7 @@ using Application.Exception;
 using Application.Interface;
 using Application.Models.Request;
 using Application.Models.Response;
+using Application.Models.ViewModel;
 using AutoMapper;
 using Domain.Contract;
 using Domain.Entities;
@@ -20,7 +21,7 @@ namespace Application.Services
         private readonly IRepositoryMotocycleBike _repositoryMotocycleBike;
         private readonly IRepositoryDeliver _repositoryDeliver;
         private readonly IRedisCacheService _redisCacheService;
-        private readonly INotify<ResponseLease> _notify;
+        private readonly INotify<MessageLease> _notify;
         private readonly ILogger<ApplicationServiceLease> _logger;        
         private readonly string _invalid = "Dados inválidos";
         private readonly string _notSaved = "Dados não gravados";        
@@ -33,6 +34,9 @@ namespace Application.Services
         private readonly string _planSmallerThanPeriod = "Plano é menor do que o período entre data início e data termino";
         private readonly string _validLicenseTypeA = "A";
         private readonly string _validLicenseTypeAB = "A+B";
+        private readonly string _addAction = "add";
+        private readonly string _updateAction = "update";
+        private readonly string _removeAction = "remove";
         private readonly int _notAffectedSet = 0;
         private readonly double _penaltyReturnAfterPreviewEndDay = 50;
         private readonly double _penaltyReturnBeforePreviewEndDay7Plan = 1.2;
@@ -40,7 +44,7 @@ namespace Application.Services
         public ApplicationServiceLease(IMapper mapper, IRepositoryLease repositoryLease, IRepositoryDeliver repositoryDeliver, 
             IRepositoryMotocycleBike repositoryMotocycleBike,
             IRedisCacheService redisCacheService,
-            INotify<ResponseLease> notify, 
+            INotify<MessageLease> notify, 
             ILogger<ApplicationServiceLease> logger) 
         { 
             _mapper = mapper;
@@ -65,7 +69,9 @@ namespace Application.Services
 
                 if (!string.IsNullOrEmpty(response.Identifier))
                 {
-                    _notify.NotifyMessage(response);
+                    var message = _mapper.Map<MessageLease>(entity);
+                    message.Action = _addAction;
+                    _notify.NotifyMessage(message);
                     return response;
                 }
                 throw new InvalidOperationException(_notSaved);
@@ -141,6 +147,9 @@ namespace Application.Services
                 }
                 var response = _mapper.Map<ResponseLease>(toUpdate);
                 _redisCacheService.InvalidateCacheEntry($"ApplicationServiceLease.getById.{identifier}");
+                var message = _mapper.Map<MessageLease>(toUpdate);
+                message.Action = _updateAction;
+                _notify.NotifyMessage(message);
                 return response;
             }
             var exceptionList = new StringBuilder();

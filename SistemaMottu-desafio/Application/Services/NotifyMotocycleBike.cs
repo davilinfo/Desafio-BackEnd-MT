@@ -1,5 +1,5 @@
 ﻿using Application.Interface;
-using Application.Models.Response;
+using Application.Models.ViewModel;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace Application.Services
 {
-    public class NotifyMotocycleBike : INotify<ResponseMotocycleBike>
+    public class NotifyMotocycleBike : INotify<MessageMoto>
     {
         private readonly IConfiguration _configuration;
         private readonly IConnectionFactory _connectionFactory;
@@ -40,9 +40,9 @@ namespace Application.Services
                 Password = _configuration.GetSection(_amqpPassword).Value
             };
         }
-        public void NotifyMessage(ResponseMotocycleBike message)
+        public void NotifyMessage(MessageMoto message)
         {
-            var serialized = JsonSerializer.Serialize<ResponseMotocycleBike>(message);
+            var serialized = JsonSerializer.Serialize<MessageMoto>(message);
             var eventid = new EventId(_evtId, _assemblyName);
             _logger.LogInformation(eventid, $"{_messageToSend} {serialized}");
 
