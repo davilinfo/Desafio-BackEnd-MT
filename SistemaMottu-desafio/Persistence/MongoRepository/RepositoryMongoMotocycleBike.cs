@@ -31,21 +31,14 @@ namespace Persistence.MongoRepository
 
         public IQueryable<MotocycleBike> GetAll()
         {
-            var collection = _mongoContext._database.GetCollection<MotocycleBike>(_collection);
-            return collection.AsQueryable();
-        }
+            throw new NotImplementedException();
+        }        
 
 #pragma warning disable CS1998 
         public async Task<MotocycleBike> GetById(string identifier)
 #pragma warning restore CS1998 
         {
-            var filter = Builders<MotocycleBike>.Filter.Eq(_identifier, identifier);
-            var collection = _mongoContext._database.GetCollection<MotocycleBike>(_collection);
-            var item = collection.Find(filter).ToList().FirstOrDefault();
-
-#pragma warning disable CS8603
-            return item;
-#pragma warning restore CS8603
+            throw new NotImplementedException();
         }
 
         public async Task<int> Update(MotocycleBike entity)
