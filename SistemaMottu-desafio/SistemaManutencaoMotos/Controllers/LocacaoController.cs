@@ -11,7 +11,7 @@ namespace SistemaManutencaoMotos.Controllers
     /// <summary>
     /// Sistema de manutenção de locação de moto
     /// </summary>
-    //[Authorize(Roles = "User")]
+    [Authorize(Roles = "User")]
     [ApiController]
     [Route("")]
     [RequiredScope(RequiredScopesConfigurationKey = "AzureAd:Scopes")]
