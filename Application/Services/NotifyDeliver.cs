@@ -14,6 +14,7 @@ namespace Application.Services
         private readonly ILogger<NotifyDeliver> _logger;
         private readonly string _amqpPort = "AMQP:Port";
         private readonly string _amqpHostName = "AMQP:Hostname";
+        private readonly string _amqpActivated = "AMQP:Activated";
         private readonly string _amqpUser = "AMQP:User";
         private readonly string _amqpPassword = "AMQP:Password";        
         private readonly string _queueNotify = "queueNotifyDeliver";
@@ -44,25 +45,27 @@ namespace Application.Services
             var serialized = JsonSerializer.Serialize<Deliver>(message);
             var eventid = new EventId(_evtId, _assemblyName);
             _logger.LogInformation(eventid, $"{_messageToSend} {serialized}");
-
-            using (var connection = _connectionFactory.CreateConnection())
-            {
-                using (var channel = connection.CreateModel())
+            if (_configuration.GetSection(_amqpActivated).Value == "true")
+            { 
+                using (var connection = _connectionFactory.CreateConnection())
                 {
-                    channel.QueueDeclare(_queueNotify,
-                        durable: false,
-                        exclusive: false,
-                        autoDelete: false);
-                    
-                    var byteMessage = System.Text.Encoding.UTF8.GetBytes(serialized);
-                    channel.BasicPublish(exchange: "",
-                        routingKey: _queueNotify,
-                        basicProperties: null,
-                        body: byteMessage);
-                    
-                    _logger.LogInformation(eventid, $"{_messageSent} {serialized}");
+                    using (var channel = connection.CreateModel())
+                    {
+                        channel.QueueDeclare(_queueNotify,
+                            durable: false,
+                            exclusive: false,
+                            autoDelete: false);
+
+                        var byteMessage = System.Text.Encoding.UTF8.GetBytes(serialized);
+                        channel.BasicPublish(exchange: "",
+                            routingKey: _queueNotify,
+                            basicProperties: null,
+                            body: byteMessage);
+
+                        _logger.LogInformation(eventid, $"{_messageSent} {serialized}");
+                    }
+                    connection.Close();
                 }
-                connection.Close();
             }
         }
     }

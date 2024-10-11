@@ -18,6 +18,7 @@ namespace Application.Services
         private readonly IRepositoryDeliver _repositoryDeliver;        
         private readonly INotify<Deliver> _notify;
         private readonly ILogger<ApplicationServiceDeliver> _logger;
+        private readonly char[] _passphrase = "$2b@D9f!kL7mP#qR8sT1vX4z".ToCharArray();
         private readonly string _notSaved = "Dados não gravados";
         private readonly string _invalid = "Dados inválidos";
         private readonly string _foundDriverLicenseNumber = "Já existe cnh cadastrada";
@@ -89,13 +90,12 @@ namespace Application.Services
         public async Task<ResponseDeliver> UpdateAsync(string identifier, RequestDeliverUpdate requestDeliverUpdate)
         {
             var entity = await _repositoryDeliver.GetById(identifier);
-            var command = _mapper.Map<UpdateDeliverCommand>(entity);
-            var modelEntity = _mapper.Map<Deliver>(requestDeliverUpdate);
+            var command = _mapper.Map<UpdateDeliverCommand>(entity);            
 
             if (command != null && command.IsValid())
             {
-                modelEntity.DriverLicenseImageS3 = await AddToIPFS(modelEntity.DriverLicenseImage);
-                var toUpdate = command.UpdateDeliver(modelEntity);                
+                var newImageRef = await AddToIPFS(requestDeliverUpdate.DriverLicenseImage);
+                var toUpdate = command.UpdateDeliver(entity, requestDeliverUpdate.DriverLicenseImage, newImageRef);                
                 UpdateBusinessValidation(toUpdate);
                 
                 var result = await _repositoryDeliver.Update(toUpdate);
@@ -104,6 +104,7 @@ namespace Application.Services
                     throw new BusinessException(_invalid);
                 }
                 var response = _mapper.Map<ResponseDeliver>(toUpdate);
+                _notify.NotifyMessage(toUpdate);
                 return response;
             }
             var exceptionList = new StringBuilder();
@@ -120,8 +121,8 @@ namespace Application.Services
         }
 
         private async Task<string> AddToIPFS(string base64string)
-        {
-            var ipfs = new IpfsEngine();
+        {            
+            var ipfs = new IpfsEngine(_passphrase);
             
             byte[] data = Convert.FromBase64String(base64string);
 

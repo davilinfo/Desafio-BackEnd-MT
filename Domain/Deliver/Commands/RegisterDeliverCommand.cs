@@ -12,8 +12,7 @@ namespace Domain.Deliver.Commands
             string uniqueIdentifier,
             DateTime birthday,
             string driverLicenseNumber,
-            string driverLicenseType,
-            string driverLicenseS3,
+            string driverLicenseType,            
             string driverLicenseImage)
         {
             this.Identifier = identifier;
@@ -22,14 +21,13 @@ namespace Domain.Deliver.Commands
             this.DriverLicenseNumber = driverLicenseNumber;
             this.DriverLicenseImage = driverLicenseImage;
             this.DriverLicenseType = driverLicenseType;
-            this.UniqueIdentifier = uniqueIdentifier;
-            this.DriverLicenseImageS3 = driverLicenseS3 ?? string.Empty;
+            this.UniqueIdentifier = uniqueIdentifier;            
             this.DriverLicenseImage = driverLicenseImage;
         }
 
         public Domain.Entities.Deliver CreateDeliver()
         {
-            return new Entities.Deliver(Identifier, Name, UniqueIdentifier, Birthday, DriverLicenseNumber, DriverLicenseType, DriverLicenseImageS3);
+            return new Entities.Deliver(Identifier, Name, UniqueIdentifier, Birthday, DriverLicenseNumber, DriverLicenseType, DriverLicenseImage);
         }        
 
         public override bool IsValid()

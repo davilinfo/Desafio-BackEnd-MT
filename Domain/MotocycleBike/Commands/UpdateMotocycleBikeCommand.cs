@@ -16,9 +16,9 @@ namespace Domain.MotocycleBike.Commands
             return ValidationResult.IsValid;
         }
 
-        public Entities.MotocycleBike UpdateMotocycleBike(Entities.MotocycleBike motocycleBike)
-        {
-            return motocycleBike.Update(motocycleBike.Plate);
+        public Entities.MotocycleBike UpdateMotocycleBike(Entities.MotocycleBike motocycleBike, string plate)
+        {            
+            return motocycleBike.Update(plate);
         }
     }
 }

@@ -44,5 +44,9 @@ namespace Domain.Deliver.Validations
         {
             RuleFor(p => p.DriverLicenseImageS3).NotEmpty().WithMessage(_mandatoryDriverLicenseImageS3);
         }
+        public void ValidateDeliverDriverLicenseImage()
+        {
+            RuleFor(p => p.DriverLicenseImage).NotEmpty().WithMessage(_mandatoryDriverLicenseImageS3);
+        }
     }
 }

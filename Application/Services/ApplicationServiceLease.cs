@@ -9,6 +9,7 @@ using Domain.Entities;
 using Domain.Lease.Commands;
 using Microsoft.Extensions.Logging;
 using System.Text;
+using System.Text.Json;
 
 namespace Application.Services
 {
@@ -18,12 +19,14 @@ namespace Application.Services
         private readonly IRepositoryLease _repositoryLease;
         private readonly IRepositoryMotocycleBike _repositoryMotocycleBike;
         private readonly IRepositoryDeliver _repositoryDeliver;
+        private readonly IRedisCacheService _redisCacheService;
         private readonly INotify<ResponseLease> _notify;
         private readonly ILogger<ApplicationServiceLease> _logger;        
         private readonly string _invalid = "Dados inválidos";
         private readonly string _notSaved = "Dados não gravados";        
         private readonly string _notFoundDeliver = "Entregador inexistente";
         private readonly string _notFoundMotocycleBike = "Moto inexistente";
+        private readonly string _notFoundLease = "Locação não encontrada";
         private readonly string _deliverLicenseInvalid = "Carteira de habilitação inválida";
         private readonly string _initialDateAboveEndDate = "Data início superior data termino";
         private readonly string _initialDateAbovePreviewEndDate = "Data início superior data termino";
@@ -36,6 +39,7 @@ namespace Application.Services
         private readonly double _penaltyReturnBeforePreviewEndDay15Plan = 1.4;
         public ApplicationServiceLease(IMapper mapper, IRepositoryLease repositoryLease, IRepositoryDeliver repositoryDeliver, 
             IRepositoryMotocycleBike repositoryMotocycleBike,
+            IRedisCacheService redisCacheService,
             INotify<ResponseLease> notify, 
             ILogger<ApplicationServiceLease> logger) 
         { 
@@ -43,6 +47,7 @@ namespace Application.Services
             _repositoryLease = repositoryLease;
             _repositoryDeliver = repositoryDeliver;
             _repositoryMotocycleBike = repositoryMotocycleBike;
+            _redisCacheService = redisCacheService;
             _notify = notify;
             _logger = logger;
         }
@@ -97,13 +102,24 @@ namespace Application.Services
 
         public async Task<ResponseLease> GetById(string identifier)
         {
-            var entity = await _repositoryLease.GetById(identifier);
-            if (entity != null)
+            var inCacheStore = _redisCacheService.GetValue($"ApplicationServiceLease.getById.{identifier}");
+            if (string.IsNullOrEmpty(inCacheStore))
             {
-                var result = _mapper.Map<ResponseLease>(entity);
+                var entity = await _repositoryLease.GetById(identifier);
+                if (entity != null)
+                {
+                    var result = _mapper.Map<ResponseLease>(entity);
+                    var serialized = JsonSerializer.Serialize(result);
+                    _redisCacheService.SetValue($"ApplicationServiceLease.getById.{identifier}", serialized);
+                    return result;
+                }
+            }
+            else
+            {
+                var result = JsonSerializer.Deserialize<ResponseLease>(inCacheStore);
+#pragma warning disable CS8603
                 return result;
             }
-#pragma warning disable CS8603 
             return null;
 #pragma warning restore CS8603
         }
@@ -111,12 +127,11 @@ namespace Application.Services
         public async Task<ResponseLease> UpdateAsync(string identifier, RequestLeaseUpdate requestLeaseUpdate)
         {
             var entity = await _repositoryLease.GetById(identifier);
-            var command = _mapper.Map<UpdateLeaseCommand>(entity);
-            var modelEntity = _mapper.Map<Lease>(requestLeaseUpdate);
+            var command = _mapper.Map<UpdateLeaseCommand>(entity);            
 
             if (command != null && command.IsValid())
             {
-                var toUpdate = command.UpdateLease(modelEntity);
+                var toUpdate = command.UpdateLease(entity, requestLeaseUpdate.DevolutionDate);
                 UpdateBusinessValidation(toUpdate);
                 SetValueDevolution(ref toUpdate);
                 var result = await _repositoryLease.Update(toUpdate);
@@ -125,6 +140,7 @@ namespace Application.Services
                     throw new BusinessException(_invalid);
                 }
                 var response = _mapper.Map<ResponseLease>(toUpdate);
+                _redisCacheService.InvalidateCacheEntry($"ApplicationServiceLease.getById.{identifier}");
                 return response;
             }
             var exceptionList = new StringBuilder();
@@ -171,7 +187,7 @@ namespace Application.Services
             var lease = _repositoryLease.GetAll().FirstOrDefault(p=> p.Identifier == entity.Identifier);
             if (lease == null)
             {
-                throw new BusinessException(_notFoundDeliver);
+                throw new BusinessException(_notFoundLease);
             }
         }
 

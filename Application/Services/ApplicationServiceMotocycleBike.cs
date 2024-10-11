@@ -7,6 +7,7 @@ using Domain.Contract;
 using Domain.Entities;
 using Domain.MotocycleBike.Commands;
 using System.Text;
+using System.Text.Json;
 
 namespace Application.Services
 {
@@ -16,6 +17,7 @@ namespace Application.Services
         private readonly IRepositoryMotocycleBike _repositoryMotocycleBike;
         private readonly IRepositoryLease _repositoryLease;
         private readonly INotify<ResponseMotocycleBike> _notify;
+        private readonly IRedisCacheService _redisCacheService;
         private readonly string _plateFound = "Placa existente";
         private readonly string _invalid = "Dados inválidos";
         private readonly string _notSaved = "Dados não gravados";
@@ -24,11 +26,13 @@ namespace Application.Services
         public ApplicationServiceMotocycleBike(IMapper mapper, 
             IRepositoryMotocycleBike repositoryMotocycleBike, 
             IRepositoryLease repositoryLease,
+            IRedisCacheService redisCacheService,
             INotify<ResponseMotocycleBike> notify) 
         { 
             _mapper = mapper;
             _repositoryMotocycleBike = repositoryMotocycleBike;
             _repositoryLease = repositoryLease;
+            _redisCacheService = redisCacheService;
             _notify = notify;
         }
 
@@ -44,6 +48,7 @@ namespace Application.Services
                 var response = _mapper.Map<ResponseMotocycleBike>(entity);
                 if (!string.IsNullOrEmpty(response.Identifier))
                 {
+                    _redisCacheService.InvalidateCacheEntry("ApplicationServiceMotocycleBike.getAllmotos");
                     _notify.NotifyMessage(response);
                     return response;
                 }
@@ -58,7 +63,7 @@ namespace Application.Services
 
         public async Task DeleteAsync(string identifier)
         {
-            var anyMoto = _repositoryLease.GetAll().Any(p=>p.MotocycleBikeId == identifier);
+            var anyMoto = _repositoryLease.GetAll().Any(p=> p != null && p.MotocycleBikeId == identifier);
             if (anyMoto)
             {
                 throw new BusinessException(_existMotoLease);
@@ -69,39 +74,63 @@ namespace Application.Services
             {
                 throw new BusinessException(_invalid);
             }
+            _redisCacheService.InvalidateCacheEntry("ApplicationServiceMotocycleBike.getAllmotos");
+            _redisCacheService.InvalidateCacheEntry($"ApplicationServiceMotocycleBike.getById.{identifier}");
         }
 
         public Task<List<ResponseMotocycleBike>> GetAllAsync()
         {
-            
-            var result = from item in _repositoryMotocycleBike.GetAll()
-                         select new ResponseMotocycleBike 
-                         { 
-                             Identifier = item.Identifier, 
-                             Model = item.Model, 
-                             Plate = item.Plate, 
-                             Year = item.Year 
-                         };
-            
-            return Task.FromResult(result.ToList());
+            var inCacheStore = _redisCacheService.GetValue($"ApplicationServiceMotocycleBike.getAllmotos");
+            if (string.IsNullOrEmpty(inCacheStore))
+            {
+                var result = (from item in _repositoryMotocycleBike.GetAll()
+                             select new ResponseMotocycleBike
+                             {
+                                 Identifier = item.Identifier,
+                                 Model = item.Model,
+                                 Plate = item.Plate,
+                                 Year = item.Year
+                             }).ToList();
+                var serialized = JsonSerializer.Serialize(result);
+                _redisCacheService.SetValue("ApplicationServiceMotocycleBike.getAllmotos", serialized);
+                return Task.FromResult(result);
+            }
+            else
+            {
+                var result = JsonSerializer.Deserialize<List<ResponseMotocycleBike>>(inCacheStore);
+#pragma warning disable CS8619 
+                return Task.FromResult(result);
+#pragma warning restore CS8619 
+            }                        
         }
 
         public async Task<ResponseMotocycleBike> GetById(string identifier)
         {
-            var entity = await _repositoryMotocycleBike.GetById(identifier);
-            if (entity != null)
+            var inCacheStore = _redisCacheService.GetValue($"ApplicationServiceMotocycleBike.getById.{identifier}");
+            if (string.IsNullOrEmpty(inCacheStore))
             {
-                var result = _mapper.Map<ResponseMotocycleBike>(entity);
+                var entity = await _repositoryMotocycleBike.GetById(identifier);
+                if (entity != null)
+                {
+                    var result = _mapper.Map<ResponseMotocycleBike>(entity);
+                    var serialized = JsonSerializer.Serialize(result);
+                    _redisCacheService.SetValue($"ApplicationServiceMotocycleBike.getById.{identifier}", serialized);
+                    return result;
+                }
+            }
+            else
+            {
+                var result = JsonSerializer.Deserialize<ResponseMotocycleBike>(inCacheStore);
+#pragma warning disable CS8603
                 return result;
             }
-#pragma warning disable CS8603 
             return null;
 #pragma warning restore CS8603 
         }                
 
         public void RegisterBusinessValidation(MotocycleBike entity)
         {
-            var result = _repositoryMotocycleBike.GetAll().Any(p => p.Plate.Equals(entity.Plate, StringComparison.CurrentCultureIgnoreCase));
+            var result = _repositoryMotocycleBike.GetAll().Any(p => p != null && p.Plate.ToLower() == entity.Plate.ToLower());
             if (result)
             {
                 throw new BusinessException(_plateFound);
@@ -110,7 +139,7 @@ namespace Application.Services
 
         public void UpdateBusinessValidation(MotocycleBike entity)
         {
-            var result = _repositoryMotocycleBike.GetAll().Any(p => p.Plate.Equals(entity.Plate, StringComparison.CurrentCultureIgnoreCase));
+            var result = _repositoryMotocycleBike.GetAll().Any(p => p != null && p.Plate.ToLower() == entity.Plate.ToLower());
             if (result)
             {
                 throw new BusinessException(_plateFound);
@@ -120,12 +149,11 @@ namespace Application.Services
         public async Task<ResponseMotocycleBike> UpdateAsync(string identifier, RequestMotocycleUpdate request)
         {
             var entity = await _repositoryMotocycleBike.GetById(identifier);
-            var command = _mapper.Map<UpdateMotocycleBikeCommand>(entity);
-            var modelEntity = _mapper.Map<MotocycleBike>(request);
+            var command = _mapper.Map<UpdateMotocycleBikeCommand>(entity);            
 
             if (command != null && command.IsValid())
             {
-                var toUpdate = command.UpdateMotocycleBike(modelEntity);
+                var toUpdate = command.UpdateMotocycleBike(entity, request.Plate);
                 UpdateBusinessValidation(toUpdate);
                 var result = await _repositoryMotocycleBike.Update(toUpdate);
                 if (result == _notAffectedSet)
@@ -133,6 +161,8 @@ namespace Application.Services
                     throw new BusinessException(_invalid);
                 }
                 var response = _mapper.Map<ResponseMotocycleBike>(toUpdate);
+                _redisCacheService.InvalidateCacheEntry("ApplicationServiceMotocycleBike.getAllmotos");
+                _redisCacheService.InvalidateCacheEntry($"ApplicationServiceMotocycleBike.getById.{identifier}");
                 return response;
             }
             var exceptionList = new StringBuilder();
@@ -144,15 +174,28 @@ namespace Application.Services
             throw new BusinessException(exceptionList.ToString());
         }
 
-        public Task<ResponseMotocycleBike> GetByPlate(string plate)
+        public Task<List<ResponseMotocycleBike>> GetByPlate(string plate)
         {
-            var entity = _repositoryMotocycleBike.GetAll().FirstOrDefault(p=> p.Plate == plate);
-            if (entity != null)
+            var inCacheStore = _redisCacheService.GetValue($"ApplicationServiceMotocycleBike.getByPlate.{plate}");
+            if (string.IsNullOrEmpty(inCacheStore))
             {
-                var result = _mapper.Map<ResponseMotocycleBike>(entity);
-                return Task.FromResult(result);
+                var entity = _repositoryMotocycleBike.GetAll().Where(p => p != null && p.Plate == plate).ToList();
+                if (entity != null)
+                {
+                    var result = _mapper.Map<List<ResponseMotocycleBike>>(entity);
+                    var serialized = JsonSerializer.Serialize(result);
+                    _redisCacheService.SetValue($"ApplicationServiceMotocycleBike.getByPlate.{plate}", serialized);
+                    return Task.FromResult(result);
+                }
             }
-#pragma warning disable CS8603 
+            else
+            {
+                var result = JsonSerializer.Deserialize<List<ResponseMotocycleBike>>(inCacheStore);
+#pragma warning disable CS8619
+                return Task.FromResult(result);
+#pragma warning restore CS8619
+            }
+#pragma warning disable CS8603
             return null;
 #pragma warning restore CS8603 
         }        

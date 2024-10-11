@@ -13,7 +13,7 @@ namespace Domain.Deliver.Validations
             ValidateDeliverBirthday();
             ValidateDeliverDriverLicenseNumber();
             ValidateDeliverDriverLicenseType();
-            ValidateDeliverDriverLicenseImageS3();
+            ValidateDeliverDriverLicenseImage();
         }
     }
 }

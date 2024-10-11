@@ -45,7 +45,7 @@ namespace Domain.Entities
             DateTime birthday, 
             string driverLicenseNumber, 
             string driverLicenseType, 
-            string driverLicenseS3)
+            string driverLicenseImage)
         {
             this.Identifier = identifier;
             this.Name = name;
@@ -53,7 +53,8 @@ namespace Domain.Entities
             this.DriverLicenseNumber = driverLicenseNumber;            
             this.DriverLicenseType = driverLicenseType;
             this.UniqueIdentifier = uniqueIdentifier;
-            this.DriverLicenseImageS3 = driverLicenseS3 ?? string.Empty;            
+            this.DriverLicenseImage = driverLicenseImage ?? string.Empty;
+            this.CreatedDate = DateTime.UtcNow;
         }
         
         public Deliver Update(string driverLicenseImage, string driverLicenseS3)

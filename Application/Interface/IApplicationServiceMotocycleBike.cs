@@ -7,6 +7,6 @@ namespace Application.Interface
     {
         public new Task<ResponseMotocycleBike> CreateAsync(RequestMotocycleAdd request);
         public new Task<ResponseMotocycleBike> UpdateAsync(string identifier, RequestMotocycleUpdate request);
-        public Task<ResponseMotocycleBike> GetByPlate(string plate);
+        public Task<List<ResponseMotocycleBike>> GetByPlate(string plate);        
     }
 }

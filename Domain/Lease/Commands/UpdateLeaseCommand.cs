@@ -16,9 +16,9 @@ namespace Domain.Lease.Commands
             return ValidationResult.IsValid;
         }
 
-        public Entities.Lease UpdateLease(Entities.Lease lease)
+        public Entities.Lease UpdateLease(Entities.Lease lease, DateTime devolutioDate)
         {
-            return lease.UpdateLease(DevolutionDate);
+            return lease.UpdateLease(devolutioDate);
         }
     }
 }

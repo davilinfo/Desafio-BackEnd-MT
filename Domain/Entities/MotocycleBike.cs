@@ -19,8 +19,9 @@ namespace Domain.Entities
         [Column("data_atualizada")]
         public DateTime? UpdatedDate { get; set; }             
 
-        public MotocycleBike(int year, string model, string plate)
+        public MotocycleBike(string identifier, int year, string model, string plate)
         {
+            this.Identifier = identifier;
             this.Year = year;
             this.Model = model;
             this.Plate = plate;

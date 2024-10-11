@@ -13,6 +13,8 @@ namespace Application.AutoMapper
             CreateMap<MotocycleBike, ResponseMotocycleBike>();
             CreateMap<Lease, LeaseViewModel>();            
             CreateMap<Lease, ResponseLease>();
+            CreateMap<Deliver, DeliverViewModel>();
+            CreateMap<Deliver, ResponseDeliver>();            
         }
     }
 }

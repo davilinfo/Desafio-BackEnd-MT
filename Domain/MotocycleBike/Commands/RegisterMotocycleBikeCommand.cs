@@ -20,7 +20,7 @@ namespace Domain.MotocycleBike.Commands
 
         public Entities.MotocycleBike CreateMotocycleBike()
         {
-            return new Entities.MotocycleBike(Year, Model, Plate);
+            return new Entities.MotocycleBike(Identifier, Year, Model, Plate);
         }
     }
 }

@@ -4,12 +4,13 @@ using RabbitMQ.Client;
 
 namespace Application.Services
 {
-    internal class NotifyString : INotify<string>
+    public class NotifyString : INotify<string>
     {
         private readonly IConfiguration _configuration;        
         private readonly IConnectionFactory _connectionFactory;
         private readonly string _amqpPort = "AMQP:Port";
         private readonly string _amqpHostName = "AMQP:Hostname";
+        private readonly string _amqpActivated = "AMQP:Activated";
         private readonly string _amqpUser = "AMQP:User";
         private readonly string _amqpPassword = "AMQP:Password";
         private readonly string _queueNotify = "queueNotifyMessage";
@@ -30,22 +31,25 @@ namespace Application.Services
         }
         public void NotifyMessage(string message)
         {
-            using(var connection = _connectionFactory.CreateConnection())
+            if (_configuration.GetSection(_amqpActivated).Value == "true")
             {
-                using(var channel = connection.CreateModel())
+                using (var connection = _connectionFactory.CreateConnection())
                 {
-                    channel.QueueDeclare(_queueNotify,
-                        durable: false,
-                        exclusive: false,
-                        autoDelete: false);
+                    using (var channel = connection.CreateModel())
+                    {
+                        channel.QueueDeclare(_queueNotify,
+                            durable: false,
+                            exclusive: false,
+                            autoDelete: false);
 
-                    var byteMessage = System.Text.Encoding.UTF8.GetBytes(message);
-                    channel.BasicPublish(exchange: "",
-                        routingKey: _queueNotify,
-                        basicProperties: null,
-                        body: byteMessage);
+                        var byteMessage = System.Text.Encoding.UTF8.GetBytes(message);
+                        channel.BasicPublish(exchange: "",
+                            routingKey: _queueNotify,
+                            basicProperties: null,
+                            body: byteMessage);
+                    }
+                    connection.Close();
                 }
-                connection.Close();
             }
         }
     }

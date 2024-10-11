@@ -6,10 +6,9 @@ namespace Domain.Deliver.Commands
     [ExcludeFromCodeCoverage]
     public class UpdateDeliverCommand : DeliverCommand
     {
-        public UpdateDeliverCommand(string identifier, string driverLicenseImage, string driverLicenseS3) { 
+        public UpdateDeliverCommand(string identifier, string driverLicenseImage) { 
             this.Identifier = identifier;
-            this.DriverLicenseImage = driverLicenseImage;
-            this.DriverLicenseImageS3 = driverLicenseS3;
+            this.DriverLicenseImage = driverLicenseImage;            
         }
         public override bool IsValid()
         {
@@ -17,9 +16,9 @@ namespace Domain.Deliver.Commands
             return ValidationResult.IsValid;
         }
 
-        public Domain.Entities.Deliver UpdateDeliver(Entities.Deliver deliver)
+        public Domain.Entities.Deliver UpdateDeliver(Entities.Deliver deliver, string diverLicenseImage, string diverLicenseImageS3)
         {
-            return deliver.Update(DriverLicenseImage, DriverLicenseImageS3);
+            return deliver.Update(diverLicenseImage, diverLicenseImageS3);
         }
     }
 }

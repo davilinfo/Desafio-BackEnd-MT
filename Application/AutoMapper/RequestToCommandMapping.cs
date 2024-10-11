@@ -1,5 +1,6 @@
 ﻿using Application.Models.Request;
 using AutoMapper;
+using Domain.Deliver.Commands;
 using Domain.Lease.Commands;
 using Domain.MotocycleBike.Commands;
 
@@ -11,6 +12,7 @@ namespace Application.AutoMapper
         {
             CreateMap<RequestMotocycleAdd, RegisterMotocycleBikeCommand>();
             CreateMap<RequestLeaseAdd, RegisterLeaseCommand>();
+            CreateMap<RequestDeliverAdd, RegisterDeliverCommand>();
         }
     }
 }
