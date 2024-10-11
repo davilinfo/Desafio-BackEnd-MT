@@ -31,7 +31,7 @@ namespace Application.Services
             _logger = logger;
 #pragma warning disable CS8604
             _amqpPortInUse = _configuration.GetSection(_amqpPort).Value != null ? int.Parse(_configuration.GetSection(_amqpPort).Value) : _amqpDefaultPort;
-#pragma warning restore CS8604
+
             _connectionFactory = new ConnectionFactory()
             {
                 HostName = _configuration.GetSection(_amqpHostName).Value,
@@ -45,7 +45,7 @@ namespace Application.Services
             var serialized = JsonSerializer.Serialize<Deliver>(message);
             var eventid = new EventId(_evtId, _assemblyName);
             _logger.LogInformation(eventid, $"{_messageToSend} {serialized}");
-            if (_configuration.GetSection(_amqpActivated).Value == "true")
+            if (bool.Parse(_configuration.GetSection(_amqpActivated).Value) == true)
             { 
                 using (var connection = _connectionFactory.CreateConnection())
                 {
@@ -67,6 +67,7 @@ namespace Application.Services
                     connection.Close();
                 }
             }
+#pragma warning restore CS8604
         }
     }
 }

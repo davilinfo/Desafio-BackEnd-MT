@@ -20,7 +20,6 @@ namespace Application.Services
             _configuration = configuration;
 #pragma warning disable CS8604
             var amqpPort = _configuration.GetSection(_amqpPort).Value != null ? int.Parse(_configuration.GetSection(_amqpPort).Value) : _amqpDefaultPort;
-#pragma warning restore CS8604
             _connectionFactory = new ConnectionFactory()
             {
                 HostName = _configuration.GetSection(_amqpHostName).Value,
@@ -31,7 +30,7 @@ namespace Application.Services
         }
         public void NotifyMessage(string message)
         {
-            if (_configuration.GetSection(_amqpActivated).Value == "true")
+            if (bool.Parse(_configuration.GetSection(_amqpActivated).Value) == true)
             {
                 using (var connection = _connectionFactory.CreateConnection())
                 {
@@ -51,6 +50,7 @@ namespace Application.Services
                     connection.Close();
                 }
             }
+#pragma warning restore CS8604
         }
     }
 }
