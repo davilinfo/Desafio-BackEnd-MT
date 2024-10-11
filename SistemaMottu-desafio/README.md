@@ -1,11 +1,16 @@
 ﻿## Access application
-Role Admin
 user: admin@davinetlive.onmicrosoft.com
 password: Mottu2021
 
-Role User
 user: user@davinetlive.onmicrosoft.com
 password: Mottu2021
+
+## Postman json
+- Arquivo está localizado na pasta SistemaMottu-desafio e na pasta IntegrationTests
+- No arquivo json existe authorization request configurado nas pastas locacao, motos, entregadores (conteúdos internos herdam de tais pastas configuração de authorize)
+- Pasta motos deve utilizar token de usuário admin
+- Pastas entregadores e locacao devem utilizar token de usuário user
+- Quando tokens forem gerados e salvos no postman em tais pastas então requests estarão autorizadas
 
 ## IPFS (Interplanetary file system)
 Imagem cnh é gravada no IPFS, assim apenas identificador da imagem é salvo em banco de dados
