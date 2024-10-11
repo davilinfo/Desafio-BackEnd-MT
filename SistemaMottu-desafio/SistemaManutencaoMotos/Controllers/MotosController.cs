@@ -61,7 +61,7 @@ namespace SistemaManutencaoMotos.Controllers
                 {
                     var result = await _applicationServiceMotocycleBike.CreateAsync(request);
                     _logger.LogInformation(_eventId, null, $"{_motoresponse} {result}");
-                    return Created("",result);
+                    return new JsonResult(result) { ContentType = "application/json", StatusCode = 201 };
                 }
                 foreach(var item in ModelState.Values)
                 {
@@ -70,25 +70,25 @@ namespace SistemaManutencaoMotos.Controllers
                         _logger.LogError(_eventId, error.ErrorMessage);
                     }
                 }
-                var message = new ApplicationResponse($"{_invalidRequest}");
-                return BadRequest(message.Message);
+                var message = new ApplicationResponse($"{_invalidRequest}");                
+                return new JsonResult (new Dictionary<string, string> { { "mensagem", message.Message } }) { ContentType = "application/json", StatusCode = 400 };
             }
             catch (BusinessException be)
             {
                 _logger.LogError(_eventId, be, be.Message);
                 var message = new ApplicationResponse($"{be.Message}");
-                return BadRequest($"{message.Message}");
+                return new JsonResult(new Dictionary<string, string> { { "mensagem", message.Message } }) { ContentType = "application/json", StatusCode = 400 };
             }
             catch (InvalidOperationException ioe)
             {
                 _logger.LogError(_eventId, ioe, ioe.Message);
                 var message = new ApplicationResponse($"{_invalidRequest} {ioe.Message}");
-                return BadRequest($"{message.Message}");
+                return new JsonResult(new Dictionary<string, string> { { "mensagem", message.Message } }) { ContentType = "application/json", StatusCode = 400 };
             }
             catch (Exception e)
             {
                 _logger.LogError(_eventId, e, e.Message);
-                return new StatusCodeResult(_internalError);
+                return new JsonResult(new Dictionary<string, string> { { "mensagem", e.Message } }) { ContentType = "application/json", StatusCode = 500 };
             }
         }
 
@@ -160,7 +160,7 @@ namespace SistemaManutencaoMotos.Controllers
             {
                 _logger.LogError(_eventId, be, be.Message);
                 var message = new ApplicationResponse($"{be.Message}");
-                return BadRequest(message.Message);
+                return new JsonResult(new Dictionary<string, string> { { "mensagem", message.Message } }) { ContentType = "application/json", StatusCode = 400 };
             }
             catch(Exception e)
             {

@@ -2,6 +2,7 @@
 using Application.Interface;
 using Application.Models.Request;
 using Application.Models.Response;
+using Application.Models.ViewModel;
 using AutoMapper;
 using Domain.Contract;
 using Domain.Deliver.Commands;
@@ -16,7 +17,7 @@ namespace Application.Services
     {
         private readonly IMapper _mapper;
         private readonly IRepositoryDeliver _repositoryDeliver;        
-        private readonly INotify<Deliver> _notify;
+        private readonly INotify<MessageDeliver> _notify;
         private readonly ILogger<ApplicationServiceDeliver> _logger;
         private readonly char[] _passphrase = "$2b@D9f!kL7mP#qR8sT1vX4z".ToCharArray();
         private readonly string _notSaved = "Dados não gravados";
@@ -25,9 +26,12 @@ namespace Application.Services
         private readonly string _foundDeliverUniqueIdentifier = "Já existe cnpj cadastrado";
         private readonly string _retrievedBase64String = "Retrieved Base64 string:";
         private readonly string _addedToIPFS = "Added Base64 string to IPFS:";
+        private readonly string _addAction = "add";
+        private readonly string _updateAction = "update";
+        private readonly string _removeAction = "remove";
         private readonly int _notAffectedSet = 0;
         public ApplicationServiceDeliver(IMapper mapper, IRepositoryDeliver repositoryDeliver, 
-            INotify<Deliver> notify, ILogger<ApplicationServiceDeliver> logger) 
+            INotify<MessageDeliver> notify, ILogger<ApplicationServiceDeliver> logger) 
         { 
             _mapper = mapper;
             _repositoryDeliver = repositoryDeliver;
@@ -46,7 +50,9 @@ namespace Application.Services
                 var response = _mapper.Map<ResponseDeliver>(entity);
                 if (!string.IsNullOrEmpty(entity.Identifier))
                 {
-                    _notify.NotifyMessage(entity);
+                    var message = _mapper.Map<MessageDeliver>(entity);
+                    message.Action = _addAction;
+                    _notify.NotifyMessage(message);
                     return response;
                 }
                 throw new InvalidOperationException(_notSaved);
@@ -104,7 +110,9 @@ namespace Application.Services
                     throw new BusinessException(_invalid);
                 }
                 var response = _mapper.Map<ResponseDeliver>(toUpdate);
-                _notify.NotifyMessage(toUpdate);
+                var message = _mapper.Map<MessageDeliver>(toUpdate);
+                message.Action = _updateAction;
+                _notify.NotifyMessage(message);
                 return response;
             }
             var exceptionList = new StringBuilder();

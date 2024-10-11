@@ -1,5 +1,5 @@
 ﻿using Application.Interface;
-using Domain.Entities;
+using Application.Models.ViewModel;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace Application.Services
 {
-    public class NotifyDeliver : INotify<Deliver>
+    public class NotifyDeliver : INotify<MessageDeliver>
     {
         private readonly IConfiguration _configuration;
         private readonly IConnectionFactory _connectionFactory;
@@ -40,9 +40,9 @@ namespace Application.Services
                 Password = _configuration.GetSection(_amqpPassword).Value
             };
         }
-        public void NotifyMessage(Deliver message)
+        public void NotifyMessage(MessageDeliver message)
         {
-            var serialized = JsonSerializer.Serialize<Deliver>(message);
+            var serialized = JsonSerializer.Serialize<MessageDeliver>(message);
             var eventid = new EventId(_evtId, _assemblyName);
             _logger.LogInformation(eventid, $"{_messageToSend} {serialized}");
             if (bool.Parse(_configuration.GetSection(_amqpActivated).Value) == true)

@@ -1,5 +1,4 @@
-﻿using Application.Models.Request;
-using Application.Models.ViewModel;
+﻿using Application.Models.ViewModel;
 using AutoMapper;
 using Domain.Deliver.Commands;
 using Domain.Lease.Commands;

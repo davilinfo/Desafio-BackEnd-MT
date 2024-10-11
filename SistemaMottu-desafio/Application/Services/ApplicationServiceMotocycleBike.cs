@@ -2,6 +2,7 @@
 using Application.Interface;
 using Application.Models.Request;
 using Application.Models.Response;
+using Application.Models.ViewModel;
 using AutoMapper;
 using Domain.Contract;
 using Domain.Entities;
@@ -16,24 +17,32 @@ namespace Application.Services
         private readonly IMapper _mapper;
         private readonly IRepositoryMotocycleBike _repositoryMotocycleBike;
         private readonly IRepositoryLease _repositoryLease;
-        private readonly INotify<ResponseMotocycleBike> _notify;
+        private readonly INotify<MessageMoto> _notify;
+        private readonly INotify<string> _notifyYearMoto;
         private readonly IRedisCacheService _redisCacheService;
         private readonly string _plateFound = "Placa existente";
         private readonly string _invalid = "Dados inválidos";
         private readonly string _notSaved = "Dados não gravados";
         private readonly string _existMotoLease = "Existe registro de locação de moto";
+        private readonly int _yearNotify = 2024;
+        private readonly string _notifyYearMotoMessage = "ano da moto é 2024";
+        private readonly string _addAction = "add";
+        private readonly string _updateAction = "update";
+        private readonly string _removeAction = "remove";
         private readonly int _notAffectedSet = 0;
         public ApplicationServiceMotocycleBike(IMapper mapper, 
             IRepositoryMotocycleBike repositoryMotocycleBike, 
             IRepositoryLease repositoryLease,
             IRedisCacheService redisCacheService,
-            INotify<ResponseMotocycleBike> notify) 
+            INotify<MessageMoto> notify,
+            INotify<string> notifyYearMoto) 
         { 
             _mapper = mapper;
             _repositoryMotocycleBike = repositoryMotocycleBike;
             _repositoryLease = repositoryLease;
             _redisCacheService = redisCacheService;
             _notify = notify;
+            _notifyYearMoto = notifyYearMoto;
         }
 
         public async Task<ResponseMotocycleBike> CreateAsync(RequestMotocycleAdd request)
@@ -49,7 +58,13 @@ namespace Application.Services
                 if (!string.IsNullOrEmpty(response.Identifier))
                 {
                     _redisCacheService.InvalidateCacheEntry("ApplicationServiceMotocycleBike.getAllmotos");
-                    _notify.NotifyMessage(response);
+                    var message = _mapper.Map<MessageMoto>(entity);
+                    message.Action = _addAction;
+                    _notify.NotifyMessage(message);
+                    if (message.Year == _yearNotify)
+                    {
+                        _notifyYearMoto.NotifyMessage($"{_notifyYearMotoMessage} id:{message.Identifier}");
+                    }
                     return response;
                 }
                 throw new InvalidOperationException(_notSaved);
@@ -76,6 +91,10 @@ namespace Application.Services
             }
             _redisCacheService.InvalidateCacheEntry("ApplicationServiceMotocycleBike.getAllmotos");
             _redisCacheService.InvalidateCacheEntry($"ApplicationServiceMotocycleBike.getById.{identifier}");
+            var message = new MessageMoto();
+            message.Identifier = identifier;
+            message.Action = _removeAction;
+            _notify.NotifyMessage(message);
         }
 
         public Task<List<ResponseMotocycleBike>> GetAllAsync()
@@ -163,7 +182,9 @@ namespace Application.Services
                 var response = _mapper.Map<ResponseMotocycleBike>(toUpdate);
                 _redisCacheService.InvalidateCacheEntry("ApplicationServiceMotocycleBike.getAllmotos");
                 _redisCacheService.InvalidateCacheEntry($"ApplicationServiceMotocycleBike.getById.{identifier}");
-                _notify.NotifyMessage(response);
+                var message = _mapper.Map<MessageMoto>(toUpdate);
+                message.Action = _updateAction;
+                _notify.NotifyMessage(message);
                 return response;
             }
             var exceptionList = new StringBuilder();
