@@ -1,7 +1,9 @@
 ﻿## Access application
+Role Admin
 user: admin@davinetlive.onmicrosoft.com
 password: Mottu2021
 
+Role User
 user: user@davinetlive.onmicrosoft.com
 password: Mottu2021
 
