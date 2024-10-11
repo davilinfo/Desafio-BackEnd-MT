@@ -9,7 +9,7 @@ using Microsoft.Identity.Web.Resource;
 namespace SistemaManutencaoMotos.Controllers
 {
     /// <summary>
-    /// Sistema de manutenção de motos
+    /// 
     /// </summary>
     [Authorize(Roles = "Admin")]
     [ApiController]
@@ -35,6 +35,12 @@ namespace SistemaManutencaoMotos.Controllers
         private readonly IApplicationServiceMotocycleBike _applicationServiceMotocycleBike;
         private readonly ILogger<MotosController> _logger;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="applicationServiceMotocycleBike"></param>
+        /// <param name="configuration"></param>
+        /// <param name="logger"></param>
         public MotosController(IApplicationServiceMotocycleBike applicationServiceMotocycleBike, IConfiguration configuration, 
             ILogger<MotosController> logger)
         {
@@ -95,7 +101,7 @@ namespace SistemaManutencaoMotos.Controllers
         /// <summary>
         /// Consultar motos existentes
         /// </summary>
-        /// <param name="placa">placa</param>
+        /// <param name="plate">placa</param>
         /// <returns>Lista de motos</returns>
         [HttpGet("motos")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<ResponseMotocycleBike>))]        
@@ -172,7 +178,7 @@ namespace SistemaManutencaoMotos.Controllers
         /// <summary>
         /// Consultar motos existes por id
         /// </summary>
-        /// <param name="request">id</param>
+        /// <param name="id">id</param>
         /// <returns></returns>
         [HttpGet("motos/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseMotocycleBike))]
@@ -206,7 +212,11 @@ namespace SistemaManutencaoMotos.Controllers
                 return new StatusCodeResult(_internalError);
             }
         }
-
+        /// <summary>
+        /// Remover uma moto
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("motos/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EmptyResponse))]
         [ProducesResponseType<ApplicationResponse>(StatusCodes.Status400BadRequest)]        

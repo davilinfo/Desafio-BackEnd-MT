@@ -32,6 +32,7 @@ namespace Application.Services
         private readonly string _initialDateAboveEndDate = "Data início superior data termino";
         private readonly string _initialDateAbovePreviewEndDate = "Data início superior data termino";
         private readonly string _planSmallerThanPeriod = "Plano é menor do que o período entre data início e data termino";
+        private readonly string _motoAlreadyRented = "Moto está em aluguel";
         private readonly string _validLicenseTypeA = "A";
         private readonly string _validLicenseTypeAB = "A+B";
         private readonly string _addAction = "add";
@@ -177,6 +178,13 @@ namespace Application.Services
             {
                 throw new BusinessException (_notFoundMotocycleBike);
             }
+
+            var leaseExists = _repositoryLease.GetAll().Any(p => p.MotocycleBikeId == entity.MotocycleBikeId && (entity.InitialDate >= p.InitialDate || p.InitialDate <= entity.EndDate));
+            if (leaseExists)
+            {
+                throw new BusinessException(_motoAlreadyRented);
+            }
+            
             if (entity.InitialDate.Date > entity.EndDate.Date)
             {
                 throw new BusinessException(_initialDateAboveEndDate);

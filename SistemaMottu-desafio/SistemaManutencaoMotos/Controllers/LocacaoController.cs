@@ -9,7 +9,7 @@ using Microsoft.Identity.Web.Resource;
 namespace SistemaManutencaoMotos.Controllers
 {
     /// <summary>
-    /// Sistema de manutenção de locação de moto
+    /// 
     /// </summary>
     [Authorize(Roles = "User")]
     [ApiController]
@@ -32,6 +32,12 @@ namespace SistemaManutencaoMotos.Controllers
         private readonly IApplicationServiceLease _applicationServiceLease;
         private readonly ILogger<LocacaoController> _logger;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="applicationServiceLease"></param>
+        /// <param name="configuration"></param>
+        /// <param name="logger"></param>
         public LocacaoController(IApplicationServiceLease applicationServiceLease, IConfiguration configuration,
             ILogger<LocacaoController> logger)
         {

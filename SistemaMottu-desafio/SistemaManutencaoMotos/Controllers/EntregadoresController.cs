@@ -9,7 +9,7 @@ using Microsoft.Identity.Web.Resource;
 namespace SistemaManutencaoMotos.Controllers
 {
     /// <summary>
-    /// Sistema de manutenção de entregador
+    /// 
     /// </summary>    
     [Authorize(Roles = "User")]
     [ApiController]
@@ -28,7 +28,12 @@ namespace SistemaManutencaoMotos.Controllers
         private readonly IConfiguration _config;
         private readonly IApplicationServiceDeliver _applicationServiceDeliver;
         private readonly ILogger<EntregadoresController> _logger;
-
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="applicationServiceDeliver"></param>
+        /// <param name="configuration"></param>
+        /// <param name="logger"></param>
         public EntregadoresController(IApplicationServiceDeliver applicationServiceDeliver, IConfiguration configuration,
             ILogger<EntregadoresController> logger)
         {
@@ -82,7 +87,7 @@ namespace SistemaManutencaoMotos.Controllers
             catch (Exception e)
             {
                 _logger.LogError(_eventId, e, e.Message);
-                return new JsonResult(new Dictionary<string, string> { { "mensagem", e.Message } }) { ContentType = "application/json", StatusCode = 500 };
+                return new JsonResult(new Dictionary<string, string> { { "mensagem", e.Message } }) { ContentType = "application/json", StatusCode = _internalError };
             }
         }
 
@@ -126,7 +131,7 @@ namespace SistemaManutencaoMotos.Controllers
             catch (Exception e)
             {
                 _logger.LogError(_eventId, e, e.Message);
-                return new JsonResult(new Dictionary<string, string> { { "mensagem", e.Message } }) { ContentType = "application/json", StatusCode = 500 };
+                return new JsonResult(new Dictionary<string, string> { { "mensagem", e.Message } }) { ContentType = "application/json", StatusCode = _internalError };
             }            
         }
     }

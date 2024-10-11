@@ -31,19 +31,12 @@ namespace Persistence.MongoRepository
 
         public IQueryable<Lease> GetAll()
         {
-            var collection = _mongoContext._database.GetCollection<Lease>(_collection);
-            return collection.AsQueryable();
+            throw new NotImplementedException();
         }
 
         public async Task<Lease> GetById(string identifier)
         {
-            var filter = Builders<Lease>.Filter.Eq(_identifier, identifier);
-            var collection = _mongoContext._database.GetCollection<Lease>(_collection);
-            var item = collection.AsQueryable().FirstOrDefault(p=> p.Identifier == identifier);
-
-#pragma warning disable CS8603
-            return item;
-#pragma warning restore CS8603
+            throw new NotImplementedException();
         }
 
         public async Task<int> Update(Lease entity)
