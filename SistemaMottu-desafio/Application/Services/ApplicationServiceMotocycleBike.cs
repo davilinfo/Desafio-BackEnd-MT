@@ -163,6 +163,7 @@ namespace Application.Services
                 var response = _mapper.Map<ResponseMotocycleBike>(toUpdate);
                 _redisCacheService.InvalidateCacheEntry("ApplicationServiceMotocycleBike.getAllmotos");
                 _redisCacheService.InvalidateCacheEntry($"ApplicationServiceMotocycleBike.getById.{identifier}");
+                _notify.NotifyMessage(response);
                 return response;
             }
             var exceptionList = new StringBuilder();
