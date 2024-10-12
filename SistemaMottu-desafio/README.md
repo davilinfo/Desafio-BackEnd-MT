@@ -5,6 +5,9 @@ password: Mottu2021
 user: user@davinetlive.onmicrosoft.com
 password: Mottu2021
 
+## Instruções de uso
+Arquivo InstrucaoUso.docx contém passo passo como instalar containers, executar migration db e iniciar solução. Além disso, contém testes de evidências de todos endpoints do web api, unit tests confirmation, integration tests confirmations e mutation tests
+
 ## Postman json
 - Arquivo está localizado na pasta SistemaMottu-desafio e na pasta IntegrationTests
 - No arquivo json existe authorization request configurado nas pastas locacao, motos, entregadores (conteúdos internos herdam de tais pastas configuração de authorize)
@@ -28,7 +31,8 @@ docker run --name mongodb -p 27017:27017 -d mongo:latest
 docker run --name manutencaomoto -p 5432:5432 -e POSTGRES_USER=moto -e POSTGRES_PASSWORD=moto -e POSTGRES_DB=manutencaomoto -d postgres
 
 ### Criar tabelas (Executar no cmd na pasta da solução)
-dotnet ef database update 20241009124749_initial --project Persistence -s SistemaManutencaoMotos -c Context --verbose
+- dotnet tool install --global dotnet-ef
+- dotnet ef database update 20241009124749_initial --project Persistence -s SistemaManutencaoMotos -c Context --verbose
 ### ou (Executar no Gerenciador de pacotes projeto Persistence o comando entity framework tool)
 Update-Database
 
