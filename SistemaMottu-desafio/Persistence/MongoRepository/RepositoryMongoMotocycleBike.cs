@@ -1,5 +1,6 @@
 ﻿using Domain.Contract.Mongo;
 using Domain.Entities;
+using Domain.Entities.Mongo;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 
@@ -31,14 +32,25 @@ namespace Persistence.MongoRepository
 
         public IQueryable<MotocycleBike> GetAll()
         {
-            throw new NotImplementedException();
+            var collection = _mongoContext._database.GetCollection<MotocycleBikeMongo>(_collection);
+            var query = from item in collection.AsQueryable<MotocycleBikeMongo>()
+                        select new MotocycleBike(item.Identifier, item.Year, item.Model, item.Plate);
+            return query;
         }        
 
 #pragma warning disable CS1998 
         public async Task<MotocycleBike> GetById(string identifier)
 #pragma warning restore CS1998 
-        {
-            throw new NotImplementedException();
+        {            
+            var collection = _mongoContext._database.GetCollection<MotocycleBikeMongo>(_collection);
+            var deliverMongo = (from item in collection.AsQueryable<MotocycleBikeMongo>()
+                       where item.Identifier == identifier
+                       select new MotocycleBike(item.Identifier, item.Year, item.Model, item.Plate)).FirstOrDefault();
+#pragma warning disable CS8602
+            var result = new MotocycleBike(deliverMongo.Identifier, deliverMongo.Year, deliverMongo.Model, deliverMongo.Plate);
+#pragma warning restore CS8602
+
+            return result;
         }
 
         public async Task<int> Update(MotocycleBike entity)

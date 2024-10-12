@@ -1,6 +1,8 @@
 ﻿using Domain.Contract.Mongo;
 using Domain.Entities;
+using Domain.Entities.Mongo;
 using Microsoft.Extensions.Configuration;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Persistence.MongoRepository
@@ -31,12 +33,44 @@ namespace Persistence.MongoRepository
 
         public IQueryable<Deliver> GetAll()
         {
-            throw new NotImplementedException();
+            var collection = _mongoContext._database.GetCollection<DeliverMongo>(_collection);
+            var query = from item in collection.AsQueryable<DeliverMongo>()
+                        select new Deliver { 
+                            Identifier = item.Identifier,
+                            Birthday = item.Birthday,
+                            CreatedDate = item.CreatedDate,
+                            DriverLicenseImageS3 = item.DriverLicenseImage,
+                            DriverLicenseNumber = item.DriverLicenseNumber,
+                            DriverLicenseType = item.DriverLicenseType,
+                            Name = item.Name,
+                            UniqueIdentifier = item.UniqueIdentifier
+                        };
+            return query;
         }
 
+#pragma warning disable CS1998 
         public async Task<Deliver> GetById(string identifier)
+#pragma warning restore CS1998 
         {
-            throw new NotImplementedException();
+            var filter = Builders<DeliverMongo>.Filter.Eq(_identifier, identifier);
+            var collection = _mongoContext._database.GetCollection<DeliverMongo>(_collection);
+            var result = (from item in collection.AsQueryable<DeliverMongo>()
+                          where item.Identifier == identifier
+                          select new Deliver
+                          {
+                              Identifier = item.Identifier,
+                              Birthday = item.Birthday,
+                              CreatedDate = item.CreatedDate,
+                              DriverLicenseImageS3 = item.DriverLicenseImage,
+                              DriverLicenseNumber = item.DriverLicenseNumber,
+                              DriverLicenseType = item.DriverLicenseType,
+                              Name = item.Name,
+                              UniqueIdentifier = item.UniqueIdentifier
+                          }).FirstOrDefault();
+
+#pragma warning disable CS8603
+            return result;
+#pragma warning restore CS8603
         }
 
         public async Task<int> Update(Deliver entity)

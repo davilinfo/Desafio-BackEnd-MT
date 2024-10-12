@@ -1,5 +1,6 @@
 ﻿using Domain.Contract.Mongo;
 using Domain.Entities;
+using Domain.Entities.Mongo;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 
@@ -31,12 +32,33 @@ namespace Persistence.MongoRepository
 
         public IQueryable<Lease> GetAll()
         {
-            throw new NotImplementedException();
+            var collection = _mongoContext._database.GetCollection<LeaseMongo>(_collection);
+            var query = from item in collection.AsQueryable<LeaseMongo>()
+                        select new Lease (item.DeliverId, item.MotocycleBikeId, item.InitialDate, item.EndDate, item.PreviewEndDate, item.Plan)
+                        {
+                            Identifier = item.Identifier
+                        };
+            return query;
         }
 
+#pragma warning disable CS1998
         public async Task<Lease> GetById(string identifier)
-        {
-            throw new NotImplementedException();
+#pragma warning restore CS1998
+        {            
+            var collection = _mongoContext._database.GetCollection<LeaseMongo>(_collection);
+            var deliverMongo = (from item in collection.AsQueryable<LeaseMongo>()
+                                where item.Identifier == identifier
+                                select new Lease(item.DeliverId, item.MotocycleBikeId, item.InitialDate, item.EndDate, item.PreviewEndDate, item.Plan)
+                                {
+                                    Identifier = item.Identifier
+                                }).FirstOrDefault();
+#pragma warning disable CS8602
+            var result = new Lease(deliverMongo.DeliverId, deliverMongo.MotocycleBikeId, deliverMongo.InitialDate, deliverMongo.EndDate, 
+                deliverMongo.PreviewEndDate, deliverMongo.Plan)
+            { Identifier = deliverMongo.Identifier};
+#pragma warning restore CS8602
+
+            return result;
         }
 
         public async Task<int> Update(Lease entity)
