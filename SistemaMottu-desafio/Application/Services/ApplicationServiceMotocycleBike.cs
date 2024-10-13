@@ -5,6 +5,7 @@ using Application.Models.Response;
 using Application.Models.ViewModel;
 using AutoMapper;
 using Domain.Contract;
+using Domain.Contract.Mongo;
 using Domain.Entities;
 using Domain.MotocycleBike.Commands;
 using System.Text;
@@ -17,6 +18,7 @@ namespace Application.Services
         private readonly IMapper _mapper;
         private readonly IRepositoryMotocycleBike _repositoryMotocycleBike;
         private readonly IRepositoryLease _repositoryLease;
+        private readonly IRepositoryMongoMoto _repositoryMongoMoto;
         private readonly INotify<MessageMoto> _notify;
         private readonly INotify<string> _notifyYearMoto;
         private readonly IRedisCacheService _redisCacheService;
@@ -33,6 +35,7 @@ namespace Application.Services
         public ApplicationServiceMotocycleBike(IMapper mapper, 
             IRepositoryMotocycleBike repositoryMotocycleBike, 
             IRepositoryLease repositoryLease,
+            IRepositoryMongoMoto repositoryMongoMoto,
             IRedisCacheService redisCacheService,
             INotify<MessageMoto> notify,
             INotify<string> notifyYearMoto) 
@@ -40,6 +43,7 @@ namespace Application.Services
             _mapper = mapper;
             _repositoryMotocycleBike = repositoryMotocycleBike;
             _repositoryLease = repositoryLease;
+            _repositoryMongoMoto = repositoryMongoMoto; 
             _redisCacheService = redisCacheService;
             _notify = notify;
             _notifyYearMoto = notifyYearMoto;
@@ -102,7 +106,8 @@ namespace Application.Services
             var inCacheStore = _redisCacheService.GetValue($"ApplicationServiceMotocycleBike.getAllmotos");
             if (string.IsNullOrEmpty(inCacheStore))
             {
-                var result = (from item in _repositoryMotocycleBike.GetAll()
+
+                var result = (from item in _repositoryMongoMoto.GetAll()
                              select new ResponseMotocycleBike
                              {
                                  Identifier = item.Identifier,
@@ -128,7 +133,7 @@ namespace Application.Services
             var inCacheStore = _redisCacheService.GetValue($"ApplicationServiceMotocycleBike.getById.{identifier}");
             if (string.IsNullOrEmpty(inCacheStore))
             {
-                var entity = await _repositoryMotocycleBike.GetById(identifier);
+                var entity = await _repositoryMongoMoto.GetById(identifier);
                 if (entity != null)
                 {
                     var result = _mapper.Map<ResponseMotocycleBike>(entity);
@@ -201,7 +206,7 @@ namespace Application.Services
             var inCacheStore = _redisCacheService.GetValue($"ApplicationServiceMotocycleBike.getByPlate.{plate}");
             if (string.IsNullOrEmpty(inCacheStore))
             {
-                var entity = _repositoryMotocycleBike.GetAll().Where(p => p != null && p.Plate == plate).ToList();
+                var entity = _repositoryMongoMoto.GetAll().Where(p => p != null && p.Plate == plate).ToList();
                 if (entity != null)
                 {
                     var result = _mapper.Map<List<ResponseMotocycleBike>>(entity);

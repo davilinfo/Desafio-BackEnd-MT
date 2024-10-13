@@ -126,7 +126,7 @@ namespace SistemaManutencaoMotos.Controllers
             catch(Exception e)
             {
                 _logger.LogError(_eventId, e, e.Message);
-                return new StatusCodeResult(_internalError);
+                return new JsonResult(new Dictionary<string, string> { { "mensagem", e.Message } }) { ContentType = "application/json", StatusCode = 500 };
             }
         }
 
@@ -171,7 +171,7 @@ namespace SistemaManutencaoMotos.Controllers
             catch(Exception e)
             {
                 _logger.LogError(_eventId, e, e.Message);
-                return new StatusCodeResult(_internalError);
+                return new JsonResult(new Dictionary<string, string> { { "mensagem", e.Message } }) { ContentType = "application/json", StatusCode = 500 };
             }            
         }
 
@@ -205,11 +205,11 @@ namespace SistemaManutencaoMotos.Controllers
                     }
                 }
                 var message = new ApplicationResponse($"{_badFormatRequest}");
-                return BadRequest(message);
+                return new JsonResult(new Dictionary<string, string> { { "mensagem", message.Message } }) { ContentType = "application/json", StatusCode = 400 };
             }catch(Exception e)
             {
                 _logger.LogError(_eventId, e, e.Message);
-                return new StatusCodeResult(_internalError);
+                return new JsonResult(new Dictionary<string, string> { { "mensagem", e.Message } }) { ContentType = "application/json", StatusCode = 500 };
             }
         }
         /// <summary>
@@ -238,18 +238,18 @@ namespace SistemaManutencaoMotos.Controllers
                     }
                 }
                 var message = new ApplicationResponse($"{_invalidRequest}");
-                return BadRequest(message.Message);
+                return new JsonResult(new Dictionary<string, string> { { "mensagem", message.Message } }) { ContentType = "application/json", StatusCode = 400 };
             }
             catch(BusinessException be)
             {
                 _logger.LogError(_eventId, be, be.Message);
                 var message = new ApplicationResponse($"{_invalidRequest} {be.Message}");
-                return BadRequest(message.Message);
+                return new JsonResult(new Dictionary<string, string> { { "mensagem", message.Message } }) { ContentType = "application/json", StatusCode = 400 };
             }
             catch (Exception e)
             {
                 _logger.LogError(_eventId, e, e.Message);
-                return new StatusCodeResult(_internalError);
+                return new JsonResult(new Dictionary<string, string> { { "mensagem", e.Message } }) { ContentType = "application/json", StatusCode = 500 };
             }
         }
     }
