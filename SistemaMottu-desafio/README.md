@@ -8,6 +8,12 @@ password: Mottu2021
 ## Instruções de uso
 Arquivo InstrucaoUso.docx contém passo passo como instalar containers, executar migration db e iniciar solução. Além disso, contém testes de evidências de todos endpoints do web api, unit tests confirmation, integration tests confirmations e mutation tests
 
+## Branch Main
+postgres persite e retorna dados, redis cache retorna dados armazenados em cache, mensageria envia dados para mongodb
+
+## Branch Develop CQS
+contém CQS postgres persite dados, mongodb retorna dados, redis cache retorna dados armazenados em cache, mensageria envia dados para mongodb
+
 ## Postman json
 - Arquivo está localizado na pasta SistemaMottu-desafio e na pasta IntegrationTests
 - No arquivo json existe authorization request configurado nas pastas locacao, motos, entregadores (conteúdos internos herdam de tais pastas configuração de authorize)
