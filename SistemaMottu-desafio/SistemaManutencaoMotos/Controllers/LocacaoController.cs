@@ -175,7 +175,7 @@ namespace SistemaManutencaoMotos.Controllers
             catch (Exception e)
             {
                 _logger.LogError(_eventId, e, e.Message);
-                return new StatusCodeResult(_internalError);
+                return new JsonResult(new Dictionary<string, string> { { "mensagem", e.Message } }) { ContentType = "application/json", StatusCode = 500 };
             }
         }
     }

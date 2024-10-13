@@ -85,6 +85,7 @@ namespace Application.Services
             if (responseLease.Action == "add")
             {
                 var lease = new Lease(responseLease.DeliverId, responseLease.MotocycleBikeId, responseLease.InitialDate, responseLease.EndDate, responseLease.PreviewEndDate, responseLease.Plan);
+                lease.Identifier = responseLease.Identifier;
                 lease.Value = responseLease.Value;
                 await _repositoryMongoLease.Add(lease);
                 _logger.LogInformation($"listener: adicionado em mongodb lease {responseLease.Identifier}");

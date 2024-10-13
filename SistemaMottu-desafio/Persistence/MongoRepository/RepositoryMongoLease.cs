@@ -46,20 +46,16 @@ namespace Persistence.MongoRepository
 #pragma warning restore CS1998
         {            
             var collection = _mongoContext._database.GetCollection<LeaseMongo>(_collection);
-            var deliverMongo = (from item in collection.AsQueryable<LeaseMongo>()
+            var result = (from item in collection.AsQueryable<LeaseMongo>()
                                 where item.Identifier == identifier
                                 select new Lease(item.DeliverId, item.MotocycleBikeId, item.InitialDate, item.EndDate, item.PreviewEndDate, item.Plan)
                                 {
                                     Identifier = item.Identifier
                                 }).FirstOrDefault();
-#pragma warning disable CS8602
-            var result = new Lease(deliverMongo.DeliverId, deliverMongo.MotocycleBikeId, deliverMongo.InitialDate, deliverMongo.EndDate, 
-                deliverMongo.PreviewEndDate, deliverMongo.Plan)
-            { Identifier = deliverMongo.Identifier};
-#pragma warning restore CS8602
-
+#pragma warning disable CS8603            
             return result;
         }
+#pragma warning restore CS8603
 
         public async Task<int> Update(Lease entity)
         {
