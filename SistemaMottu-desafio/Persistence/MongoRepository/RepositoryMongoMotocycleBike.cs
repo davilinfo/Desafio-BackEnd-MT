@@ -43,14 +43,12 @@ namespace Persistence.MongoRepository
 #pragma warning restore CS1998 
         {            
             var collection = _mongoContext._database.GetCollection<MotocycleBikeMongo>(_collection);
-            var deliverMongo = (from item in collection.AsQueryable<MotocycleBikeMongo>()
+            var motoMongo = (from item in collection.AsQueryable<MotocycleBikeMongo>()
                        where item.Identifier == identifier
                        select new MotocycleBike(item.Identifier, item.Year, item.Model, item.Plate)).FirstOrDefault();
-#pragma warning disable CS8602
-            var result = new MotocycleBike(deliverMongo.Identifier, deliverMongo.Year, deliverMongo.Model, deliverMongo.Plate);
-#pragma warning restore CS8602
-
-            return result;
+#pragma warning disable CS8603           
+            return motoMongo;           
+#pragma warning restore CS8603
         }
 
         public async Task<int> Update(MotocycleBike entity)
