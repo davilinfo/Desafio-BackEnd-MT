@@ -6,6 +6,7 @@ using Application.Models.Response;
 using Application.Models.ViewModel;
 using AutoMapper;
 using Domain.Contract;
+using Domain.Contract.Mongo;
 using Domain.Entities;
 using Domain.Lease.Commands;
 using Microsoft.Extensions.Logging;
@@ -20,6 +21,7 @@ namespace Application.Services
         private readonly IRepositoryLease _repositoryLease;
         private readonly IRepositoryMotocycleBike _repositoryMotocycleBike;
         private readonly IRepositoryDeliver _repositoryDeliver;
+        private readonly IRepositoryMongoLease _repositoryMongoLease;
         private readonly IRedisCacheService _redisCacheService;
         private readonly INotify<MessageLease> _notify;
         private readonly ILogger<ApplicationServiceLease> _logger;        
@@ -44,6 +46,7 @@ namespace Application.Services
         private readonly double _penaltyReturnBeforePreviewEndDay15Plan = 1.4;
         public ApplicationServiceLease(IMapper mapper, IRepositoryLease repositoryLease, IRepositoryDeliver repositoryDeliver, 
             IRepositoryMotocycleBike repositoryMotocycleBike,
+            IRepositoryMongoLease repositoryMongoLease,
             IRedisCacheService redisCacheService,
             INotify<MessageLease> notify, 
             ILogger<ApplicationServiceLease> logger) 
@@ -52,6 +55,7 @@ namespace Application.Services
             _repositoryLease = repositoryLease;
             _repositoryDeliver = repositoryDeliver;
             _repositoryMotocycleBike = repositoryMotocycleBike;
+            _repositoryMongoLease = repositoryMongoLease;
             _redisCacheService = redisCacheService;
             _notify = notify;
             _logger = logger;
@@ -91,7 +95,7 @@ namespace Application.Services
 
         public Task<List<ResponseLease>> GetAllAsync()
         {
-            var result = from item in _repositoryLease.GetAll()
+            var result = from item in _repositoryMongoLease.GetAll()
                          select new ResponseLease
                          {
                              Identifier = item.Identifier,
@@ -112,7 +116,7 @@ namespace Application.Services
             var inCacheStore = _redisCacheService.GetValue($"ApplicationServiceLease.getById.{identifier}");
             if (string.IsNullOrEmpty(inCacheStore))
             {
-                var entity = await _repositoryLease.GetById(identifier);
+                var entity = await _repositoryMongoLease.GetById(identifier);
                 if (entity != null)
                 {
                     var result = _mapper.Map<ResponseLease>(entity);
