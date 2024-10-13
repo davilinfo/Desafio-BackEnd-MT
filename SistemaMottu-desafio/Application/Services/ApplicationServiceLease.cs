@@ -183,7 +183,7 @@ namespace Application.Services
                 throw new BusinessException (_notFoundMotocycleBike);
             }
 
-            var leaseExists = _repositoryLease.GetAll().Any(p => p.MotocycleBikeId == entity.MotocycleBikeId && (entity.InitialDate >= p.InitialDate || p.InitialDate <= entity.EndDate));
+            var leaseExists = _repositoryLease.GetAll().Any(p => p.MotocycleBikeId == entity.MotocycleBikeId && (entity.InitialDate >= p.InitialDate && entity.EndDate <= p.EndDate));
             if (leaseExists)
             {
                 throw new BusinessException(_motoAlreadyRented);
@@ -257,7 +257,7 @@ namespace Application.Services
             if (devolutionDate < previewEndDate && entity.Plan == (int)PlanType.SevenDays)
             {
                 var days = previewEndDate.Subtract(devolutionDate).Days;
-                var calcPenalty = days * _penaltyReturnBeforePreviewEndDay7Plan;
+                var calcPenalty = days * entity.Value * _penaltyReturnBeforePreviewEndDay7Plan;
                 var calcNormalDays = (entity.Plan - days) * (double)PlanValueType.SevenDays;
                 var total = (calcPenalty + calcNormalDays) / entity.Plan;
                 entity.Value = total;
@@ -265,7 +265,7 @@ namespace Application.Services
             if (devolutionDate < previewEndDate && entity.Plan == (int)PlanType.FifteenDays)
             {
                 var days = previewEndDate.Subtract(devolutionDate).Days;                
-                var calcPenalty = days * _penaltyReturnBeforePreviewEndDay15Plan;
+                var calcPenalty = days * entity.Value * _penaltyReturnBeforePreviewEndDay15Plan;
                 var calcNormalDays = (entity.Plan - days) * (double)PlanValueType.FifteenDays;
                 var total = (calcPenalty + calcNormalDays) / entity.Plan;
                 entity.Value = total;
