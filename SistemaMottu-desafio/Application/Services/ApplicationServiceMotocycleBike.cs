@@ -22,6 +22,7 @@ namespace Application.Services
         private readonly INotify<MessageMoto> _notify;
         private readonly INotify<string> _notifyYearMoto;
         private readonly IRedisCacheService _redisCacheService;
+        private readonly string _idFound = "Identificador existente";
         private readonly string _plateFound = "Placa existente";
         private readonly string _invalid = "Dados inválidos";
         private readonly string _notSaved = "Dados não gravados";
@@ -158,6 +159,11 @@ namespace Application.Services
             if (result)
             {
                 throw new BusinessException(_plateFound);
+            }
+            var idverify = _repositoryMotocycleBike.GetAll().Any(p => p != null && p.Identifier.ToLower() == entity.Identifier.ToLower());
+            if (idverify)
+            {
+                throw new BusinessException(_idFound);
             }
         }
 

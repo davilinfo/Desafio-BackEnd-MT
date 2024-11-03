@@ -24,6 +24,7 @@ namespace Application.Services
         private readonly string _invalid = "Dados inválidos";
         private readonly string _foundDriverLicenseNumber = "Já existe cnh cadastrada";
         private readonly string _foundDeliverUniqueIdentifier = "Já existe cnpj cadastrado";
+        private readonly string _foundDeliverIdentifier = "Já existe identificador cadastrado";
         private readonly string _retrievedBase64String = "Retrieved Base64 string:";
         private readonly string _addedToIPFS = "Added Base64 string to IPFS:";
         private readonly string _addAction = "add";
@@ -90,6 +91,11 @@ namespace Application.Services
             if (anyDeliverUniqueIdentifier)
             {
                 throw new BusinessException(_foundDeliverUniqueIdentifier);
+            }
+            var anyDeliverIdentifier = _repositoryDeliver.GetAll().Any(p => p.Identifier == entity.Identifier);
+            if (anyDeliverIdentifier)
+            {
+                throw new BusinessException(_foundDeliverIdentifier);
             }
         }
 
