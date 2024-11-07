@@ -46,6 +46,31 @@ builder.Services.AddSwaggerGen(gen =>
 
     var xmlFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     gen.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFileName), true);
+
+    gen.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Por favor entre com um token válido",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
+
+    gen.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[]{}
+        }
+    });
 });
 
 builder.Services.AddDbContext<Context>(o=> o.UseNpgsql(builder.Configuration.GetConnectionString(postgresConnectionString), a=> a.EnableRetryOnFailure()));
